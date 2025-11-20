@@ -1,0 +1,132 @@
+---
+title: "Untitled"
+output: html_document
+date: "2025-11-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+#1
+#data.table是R语言中用于高效处理数据框（data.frame）的扩展包，提供快速的数据分片、分组、聚合等功能，性能比基础包快约10倍。 ‌
+#data.table是data.frame的增强版，支持更高效的索引、分组操作，语法更简洁；data.frame是R的基础数据结构，操作相对繁琐。
+#data.table兼容data.frame的大部分操作，可相互转换。
+#as.data.table()：将data.frame转换为data.table。
+library(data.table)
+mtcars_ggbond <- as.data.table(mtcars)
+#将data.frame转换为data.tabel
+mtcars_feifei <- as.data.frame(mtcars_ggbond)
+#将data.tabel转换为data.frame
+#2
+#读取外部数据函数：fread()，可读取csv、txt等文本格式数据，支持自动识别分隔符，速度极快。
+#保存外部数据函数fwrite()，可将data.table保存为csv等文本格式。
+fwrite(mtcars_ggbond,"mtcars_chaorenqiang.csv")
+#将mtcars_ggbond保存为csv
+mtcars_xiaodaidai <- fread("mtcars_chaorenqiang.csv")
+#读取这个csv
+#3
+#i行筛选（类似数据库的where），用于指定行的条件。
+#j：列操作（类似数据库的select），用于选择列、对列做计算等。
+#by：分组操作（类似数据库的group by），用于按指定变量分组。
+#运行顺序：先执行i（行筛选），再执行by（分组），最后执行j（列操作）。
+str(mtcars)
+mtcars_ggbond[mpg > 20,(mpg_bobi = mean(mpg)),by = cyl]
+#筛选mpg大于20的行，按cyl分组计算mpg的均值
+mtcars_ggbond[cyl >5,(cyl_bobi = mean(cyl)),by = mpg]
+#筛选cyl大于5的行，按mpg分组计算cyl的均值
+#4
+#引用方式：直接使用变量名
+mtcars_ggbond[, gear_mpg :=gear + mpg]
+#引用gear和mpg变量，相加组成新变量gear_mpg
+mtcars_ggbond
+#5
+#行筛选：在i中传入逻辑向量（如mpg > 20）。
+#列筛选：在j中指定列名（如.("mpg", "cyl")）。
+#data.frame列筛选语法：df[, c("mpg", "cyl")]，该语法可直接用于data.table。
+mtcars_ggbond[disp>200]
+#筛选disp>200的行
+mtcars_ggbond[,.(cyl,disp)]
+#筛选cyl和disp的列
+#6
+mtcars_ggbond[,.(cyl)]
+#保留格式
+mtcars_ggbond[,cyl]
+#生成向量
+#7
+#多变量排序：在i中用order()，多个变量按顺序排列；升序直接写变量名，降序用-变量名或order(-变量名)。
+#可操作部分：i中可直接用order()排序；i中可同时筛选和排序。
+mtcars_ggbond[cyl > 5,][order(disp,-mpg)]
+#筛选cyl>5的行，按disp升序，mpg降序排序
+#8
+# 函数：:=（赋值操作符）；同时添加多列可在j中用列表形式。
+mtcars_ggbond[, hp_vs:= hp + vs]
+#添加hp_vs这个列
+mtcars_ggbond[, ':='(disp_cyl=disp + cyl,mpg_cly=mpg + cyl)]
+#添加disp_cyl和mpg_cly两个列
+mtcars_ggbond
+#9
+#分组操作：by按指定变量分组；by是分组后直接计算，keyby是分组后排序。
+#多变量分组求和：在j中对变量做求和，by指定多个分组变量。
+mtcars_ggbond[, .(cyl_sum=sum(cyl)),by=.(am,hp)]
+#求cyl列的和，并按am，hp进行分组
+#10
+#分组+筛选：在i中写筛选条件，by中写分组变量
+mtcars_ggbond[cyl>5,.(cyl_sum=sum(cyl)),by=am]
+#筛选cyl>5，求cyl列的和，并按am进行分组
+#11
+#含义：代表“Subset of Data”，即每个分组内的子数据集。
+#生成结构：未分组时是整个data.table；分组后是每个分组的子data.table
+mtcars_ggbond[,.SD]
+mtcars_ggbond[,.SD,by=cyl]#按cyl分组的data.tabel
+#12
+#含义：代表每个分组的观测数量（行数）。
+#生成结构：未分组时是整个数据集的行数；分组后是每个分组的行数。
+mtcars_ggbond[,.N]
+mtcars_ggbond[,.N,by=cyl]
+#按cyl进行分组后，显示每个组的行数
+#13
+#含义：链式操作，即多个data.table操作依次连接，前一个操作的结果作为后一个操作的输入。
+#适用场景：需要连续进行多个数据处理步骤（如先筛选、再分组、再计算）时，使代码更简洁。
+mtcars_ggbond[vs==1 & am==1,][,.(mpg_aver = mean(mpg),cyl_aver = mean(cyl),by = cyl)]
+#14
+#语法dt1[dt2, on = "共同变量", 操作]；有两种方式：
+#[ 操作：默认是左连接（dt1为主表）。
+#merge()：需指定all参数控制连接类型（如all = FALSE为内连接）。
+#区别data.table的[连接更简洁，支持直接在连接后对列做操作merge()语法更接近基础R，功能更通用。
+#15
+#rabindlist
+mtcars_mihulaoshi <- mtcars_ggbond + 1
+#生成新的数据集
+mtcars_mihulaoshi <- rbindlist(list(mtcars_ggbond,mtcars_mihulaoshi))
+#合并mihulaoshi和ggbond两个数据集
+mtcars_mihulaoshi
+#16
+#melt：将宽表转为长表（把多个列“融化”为行）。
+#cast：将长表转为宽表（把行“重塑”为列）。
+mtcars_feifei <- melt(mtcars_ggbond,id.vars = "cyl",measure.vars = c("hp","vs"),variable.name = "luxiaoguo",value.name = "boluochuixue")
+#将feifei数据集中的hp和vs列融化为行，保留cyl列作为标识，原列名变为luxiaoguo列，原数值变为boluochuixue列
+mtcars_feifei
+mtcars_xiongda <- dcast(mtcars_feifei,formula=cyl~luxiaoguo,value.var="boluochuixue",fun.aggregate = max)
+#cyl为行变量，luxiaoguo作为列变量，boluochuixue用于填充数值列，当行列交叉有多个值时取最大值
+mtcars_xiongda
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
